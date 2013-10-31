@@ -31,11 +31,12 @@ def main(args):
 ```
 and an example of hash map:
 ``` OCAML
-data HashMap(entries, hashFun) init(self, hashFun):
+data HashMap(entries, hashFun)
+data HashMapEntry(key', value', next)
+  
+def HashMap.init(map, hashFun):
   self.entries = new Array(16)
   self.hashFun = hashFun
-
-data HashMapEntry(key', value', next)
   
 def get(key'):
   index = hashFun.apply(key') % entries.length()
