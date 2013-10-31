@@ -63,7 +63,7 @@ def identity(value):
 def main(args):
   map = new HashMap(new Array(16), identity)
   put(map, 17, "foo")
-  print get(map, 17)   // prints bar
+  print get(map, 17)   // prints foo
   
 ```
 
