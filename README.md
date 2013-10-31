@@ -34,13 +34,9 @@ and an example of hash map:
 data HashMap(entries, hashFun)
 data HashMapEntry(key', value', next)
   
-def HashMap.init(map, hashFun):
-  self.entries = new Array(16)
-  self.hashFun = hashFun
-  
-def get(key'):
-  index = hashFun.apply(key') % entries.length()
-  entry = entries[index]
+def get(map, key'):
+  index = hashFun.apply(key') % map.entries.length()
+  entry = map.entries[index]
   while entry != null:
     if entry.key' == key':
       return entry.value'
@@ -49,9 +45,9 @@ def get(key'):
   end
   return null
   
-def put(key', value'):
-  index = hashFun.apply(key') % entries.length()
-  entry = entries[index]
+def put(map, key', value'):
+  index = hashFun.apply(key') % map.entries.length()
+  entry = map.entries[index]
   while entry != null:
     if entry.key' == key':
       entry.value' = value'
@@ -59,13 +55,13 @@ def put(key', value'):
     end
     entry = entry.next
   end
-  entries[index] = new HashMapEntry(key', value', entries[index])
+  map.entries[index] = new HashMapEntry(key', value', entries[index])
   
 def identity(value):
   value
   
 def main(args):
-  map = new HashMap(identity)
+  map = new HashMap(new Array(16), identity)
   put(map, 17, "foo")
   print get(map, 17)   // prints bar
   
