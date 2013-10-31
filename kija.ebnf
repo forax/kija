@@ -1,0 +1,163 @@
+directives:
+  autoalias
+
+imports:
+  
+  
+priorities:
+ dot = 10 left
+ unary = 9 left
+ star = 8 left
+ plus = 7 left
+ eq = 6 left
+ and = 5 left
+ is = 4 nonassoc
+ orif = 3 right
+ lambda = 2 right
+ assign = 1 right
+
+tokens:
+  plus= '\+'                   [plus]
+  minus= '-'                   [plus]
+  star = '\*'                  [star]
+  slash = '\/'                 [star]
+  mod = '%'                    [star]
+  assign= '='                  [assign]
+  eq = '=='                    [eq]
+  ne = '!='                    [eq]
+  lt= '<'                      [eq]
+  le = '<='                    [eq]
+  gt = '>'                     [eq]
+  ge = '>='                    [eq]
+  dot = '\.'                   [dot]
+  bang = '!' 
+  pipe = '\|'                  [plus]
+  amp = '&'                    [plus]
+  xor = '\^'                   [plus]
+  dpipe = '\|\|'               [and]
+  damp = '&&'                  [and]
+  at = '@'
+  is = '~'                     [is]               
+  colon= ':'
+  comma =  ','
+  eol = '\n'
+  lpar = '\('
+  rpar = '\)' 
+  lcurl = '\{'
+  rcurl = '\}'
+  lopt = '\['                  [dot]
+  ropt = '\]'
+  
+  use = 'use'
+  data = 'data'
+  def = 'def'
+  _const = 'const'
+  end = 'end'
+  _new = 'new'
+  _if = 'if'                    
+  _else = 'else'               [orif]
+  or = 'or'                    [orif]
+  print = 'print'
+  _while = 'while'
+  _return = 'return'
+  _break = 'break'
+  _continue = 'continue'
+  
+  nulz = "null"
+  bool = "true|false"
+  id = "([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*(')?(\?)?"
+  text = "\u0022([^\u0022])*\u0022"
+  integer = "[0-9]+"
+  number = "[0-9]*\.[0-9]+"
+ 
+blanks:
+ space = "( |\t|\r|\n)"
+
+comments:
+ comment = "\/\/([^\r\n])*(\r)?\n"
+ 
+types:
+ 'id': String
+ 'text': String
+ 'integer': int
+ 'number': double
+ 'bool': boolean
+ expr: com.github.kija.compiler.ast.Expr
+ block: com.github.kija.compiler.ast.BlockExpr
+ instr: com.github.kija.compiler.ast.Expr
+
+starts:
+  script
+
+productions:
+ script = member*  { script }
+        ;
+ 
+ member = 'use' 'id'                                    { use_member }
+        | 'const' 'id' '=' expr                         { const_member }
+        | 'data' 'id' '(' 'id'/'comma'* ')'             { data_member }
+        | 'def' 'id' '(' 'id'/'comma'* ')' ':' instr*   { fun_member }
+        ;
+
+ instr = expr 'eol'                   { instr_expr }
+       | 'return' expr? 'eol'         { instr_return }
+       | 'break' expr?  'eol'         { instr_break }
+       | 'continue' expr? 'eol'       { instr_continue }
+       | 'print' expr/'comma'+ 'eol'  { instr_print }
+       ;
+  
+ block = instr*      { block }
+       ; 
+  
+ expr = 'null'                                                { expr_null }
+      | 'bool'                                                { expr_bool }
+      | 'integer'                                             { expr_integer }
+      | 'number'                                              { expr_number }
+      | 'text'                                                { expr_text }
+      | '(' expr ')'                                          { expr_parens }
+      
+      | 'id'                                                  { expr_var_access }  
+      | 'id' '=' expr                             [assign]    { expr_var_assignment }
+      | expr '.' 'id'                                         { expr_attribute_access }
+      | expr '.' 'id' '=' expr                    [assign]    { expr_attribute_assignment }
+      | expr  '[' expr ']'                                    { expr_array_access }
+      | expr  '[' expr ']' '=' expr               [assign]    { expr_array_assignment }
+      
+      | 'id' '(' expr/'comma'*  ')'                           { expr_fun_call }
+      | expr '.' 'id' '(' expr/'comma'*  ')'                  { expr_method_call }
+      | 'new' 'id' '(' expr/'comma'*  ')'                     { expr_new_call }
+      
+      | 'if' expr ':' block 'else' ':' block 'end'    [orif]      { expr_if_else }
+      | 'if' expr ':' block 'end'                             { expr_if }
+      | expr 'or' expr 'if' expr                  [orif]      { expr_orif }
+        
+      | 'while' expr ':' block 'end'                          { expr_while }
+      | 'while' expr ':' block 'else' block 'end' [orif]      { expr_while_else }
+      
+      | '-' expr                                  [unary]     { expr_unary_minus }
+      | '+' expr                                  [unary]     { expr_unary_plus }
+      | '!' expr                                  [unary]     { expr_unary_not }
+      | '~' expr                                  [unary]     { expr_unary_complement }
+      
+      | expr '~' 'id'                             [is]        { expr_is_instance }
+      
+      | expr '&' expr                             [plus]      { expr_binary_and }
+      | expr '|' expr                             [plus]      { expr_binary_or }
+      | expr '^' expr                             [plus]      { expr_binary_xor }
+      
+      | expr '+' expr                             [plus]      { expr_binary_add }
+      | expr '-' expr                             [plus]      { expr_binary_sub }
+      | expr '*' expr                             [star]      { expr_binary_mul }
+      | expr '/' expr                             [star]      { expr_binary_div }
+      | expr '%' expr                             [star]      { expr_binary_mod }
+      
+      | expr '==' expr                            [eq]        { expr_binary_eq }
+      | expr '!=' expr                            [eq]        { expr_binary_ne }
+      | expr '<' expr                             [eq]        { expr_binary_lt }
+      | expr '<=' expr                            [eq]        { expr_binary_le }
+      | expr '>' expr                             [eq]        { expr_binary_gt }
+      | expr '>=' expr                            [eq]        { expr_binary_ge }
+      
+      | expr '&&' expr                            [and]       { expr_binary_band }
+      | expr '||' expr                            [and]       { expr_binary_bor }                       
+      ;

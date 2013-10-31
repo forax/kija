@@ -1,0 +1,28 @@
+data Link(e', next)
+data LinkedList(head)
+
+def addFirst(list, e'):
+  list.head = new Link(e', list.head)
+  
+def length(list):
+  if (list == null):
+    return 0
+  end
+  return 1 + length(list.next)
+
+def fibo(n):
+  if n < 2:
+    1
+  else:
+    fibo(n - 1) + fibo(n - 2) 
+  end
+
+def main(args):
+  list = new LinkedList(null)
+  print list.length
+  list2 = new LinkedList(null)
+  list2.addFirst("foo")
+  list2.addFirst(3)
+  print list2.length
+
+
