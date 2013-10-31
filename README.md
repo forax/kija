@@ -55,7 +55,7 @@ def put(map, key', value'):
     end
     entry = entry.next
   end
-  map.entries[index] = new HashMapEntry(key', value', entries[index])
+  map.entries[index] = new HashMapEntry(key', value', map.entries[index])
   
 def identity(value):
   value
