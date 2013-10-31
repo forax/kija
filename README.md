@@ -35,7 +35,7 @@ data HashMap(entries, hashFun)
 data HashMapEntry(key', value', next)
   
 def get(map, key'):
-  index = hashFun.apply(key') % map.entries.length()
+  index = map.hashFun.apply(key') % map.entries.length()
   entry = map.entries[index]
   while entry != null:
     if entry.key' == key':
@@ -46,7 +46,7 @@ def get(map, key'):
   return null
   
 def put(map, key', value'):
-  index = hashFun.apply(key') % map.entries.length()
+  index = map.hashFun.apply(key') % map.entries.length()
   entry = map.entries[index]
   while entry != null:
     if entry.key' == key':
