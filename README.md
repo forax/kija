@@ -15,7 +15,59 @@ Mainstream languages are
 
 The goal of Kija is to be a simple yet powerful language that allows to describe and run algorithm easily
 
-Before starting to introduce the syntax and semantics of Kija,
-let me show some examples.
+Before starting to introduce the syntax and the semantics of Kija,
+let me show an example of kinked list:
+``` OCAML
+data Link(element', next)
 
+def cons(element', link):
+  return new Link(element', link)
+  
+def length(link):
+  1 + length(link.next) or 0 if link.next == null
+  
+def main(args):
+  list = cons(2, cons("foo", null))
+```
+and an example of hash map:
+``` OCAML
+data HashMap(entries, hashFun)
+data HashMapEntry(key', value', next)
+
+def init(map, hashFun):
+  map.entries = new Array(16)
+  map.hashFun = hashFun
+  
+def get(key'):
+  index = hashFun.apply(key') % entries.length()
+  entry = entries[index]
+  while entry != null:
+    if entry.key' == key':
+      return entry.value'
+    end
+    entry = entry.next
+  end
+  return null
+  
+def put(key', value'):
+  index = hashFun.apply(key') % entries.length()
+  entry = entries[index]
+  while entry != null:
+    if entry.key' == key':
+      entry.value' = value'
+      return
+    end
+    entry = entry.next
+  end
+  entries[index] = new HashMapEntry(key', value', entries[index])
+  
+def identity(value):
+  value
+  
+def main(args):
+  map = new HashMap(identity)
+  put(map, 17, "foo")
+  print get(map, 17)   // prints bar
+  
+```
 
