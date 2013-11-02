@@ -127,12 +127,12 @@ productions:
       | expr '.' 'id' '(' expr/'comma'*  ')'                  { expr_method_call }
       | 'new' 'id' '(' expr/'comma'*  ')'                     { expr_new_call }
       
-      | 'if' expr ':' block 'else' ':' block 'end'    [orif]      { expr_if_else }
+      | 'if' expr ':' block 'else' ':' block 'end'[orif]      { expr_if_else }
       | 'if' expr ':' block 'end'                             { expr_if }
       | expr 'or' expr 'if' expr                  [orif]      { expr_orif }
         
       | 'while' expr ':' block 'end'                          { expr_while }
-      | 'while' expr ':' block 'else' block 'end' [orif]      { expr_while_else }
+      | 'while' expr ':' block 'else' ':' block 'end' [orif]  { expr_while_else }
       
       | '-' expr                                  [unary]     { expr_unary_minus }
       | '+' expr                                  [unary]     { expr_unary_plus }
