@@ -2,31 +2,31 @@ package com.github.kija.printer;
 
 import java.util.List;
 
-import com.github.kija.compiler.ast.ArrayAccessExpr;
-import com.github.kija.compiler.ast.ArrayAssignmentExpr;
-import com.github.kija.compiler.ast.AttrAccessExpr;
-import com.github.kija.compiler.ast.AttrAssignmentExpr;
-import com.github.kija.compiler.ast.BinaryExpr;
-import com.github.kija.compiler.ast.BlockExpr;
-import com.github.kija.compiler.ast.Const;
-import com.github.kija.compiler.ast.Data;
-import com.github.kija.compiler.ast.Expr;
-import com.github.kija.compiler.ast.ExprVisitor;
-import com.github.kija.compiler.ast.FlowStopExpr;
-import com.github.kija.compiler.ast.FunCallExpr;
-import com.github.kija.compiler.ast.Function;
-import com.github.kija.compiler.ast.IfExpr;
-import com.github.kija.compiler.ast.IsInstanceExpr;
-import com.github.kija.compiler.ast.LiteralExpr;
-import com.github.kija.compiler.ast.MethodCallExpr;
-import com.github.kija.compiler.ast.NewCallExpr;
-import com.github.kija.compiler.ast.PrintExpr;
-import com.github.kija.compiler.ast.Script;
-import com.github.kija.compiler.ast.UnaryExpr;
-import com.github.kija.compiler.ast.Use;
-import com.github.kija.compiler.ast.VarAccessExpr;
-import com.github.kija.compiler.ast.VarAssignment;
-import com.github.kija.compiler.ast.WhileExpr;
+import com.github.kija.parser.ast.ArrayAccessExpr;
+import com.github.kija.parser.ast.ArrayAssignmentExpr;
+import com.github.kija.parser.ast.AttrAccessExpr;
+import com.github.kija.parser.ast.AttrAssignmentExpr;
+import com.github.kija.parser.ast.BinaryExpr;
+import com.github.kija.parser.ast.BlockExpr;
+import com.github.kija.parser.ast.Const;
+import com.github.kija.parser.ast.Data;
+import com.github.kija.parser.ast.Expr;
+import com.github.kija.parser.ast.ExprVisitor;
+import com.github.kija.parser.ast.FlowStopExpr;
+import com.github.kija.parser.ast.FunCallExpr;
+import com.github.kija.parser.ast.Function;
+import com.github.kija.parser.ast.IfExpr;
+import com.github.kija.parser.ast.IsInstanceExpr;
+import com.github.kija.parser.ast.LiteralExpr;
+import com.github.kija.parser.ast.MethodCallExpr;
+import com.github.kija.parser.ast.NewCallExpr;
+import com.github.kija.parser.ast.PrintExpr;
+import com.github.kija.parser.ast.Script;
+import com.github.kija.parser.ast.UnaryExpr;
+import com.github.kija.parser.ast.Use;
+import com.github.kija.parser.ast.VarAccessExpr;
+import com.github.kija.parser.ast.VarAssignment;
+import com.github.kija.parser.ast.WhileExpr;
 
 public class PrettyPrinter implements ExprVisitor<StringBuilder, StringBuilder> {
   public String prettyPrint(Script script) {
@@ -136,7 +136,7 @@ public class PrettyPrinter implements ExprVisitor<StringBuilder, StringBuilder> 
 
   @Override
   public StringBuilder visitBlock(BlockExpr expr, StringBuilder builder) {
-    for(Expr e: expr.getExprs()) {
+    for(Expr e: expr.getInstructions()) {
       e.accept(this, builder);
       builder.append('\n');
     }
@@ -233,7 +233,7 @@ public class PrettyPrinter implements ExprVisitor<StringBuilder, StringBuilder> 
       builder.append(separator);
       separator = ", ";
     }
-    return builder;
+    return builder.append('\n');
   }
 
   @Override

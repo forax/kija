@@ -1,7 +1,8 @@
 package com.github.kija.grammar.tools;
 
-import com.github.kija.compiler.ast.BlockExpr;
-import com.github.kija.compiler.ast.Expr;
+import com.github.kija.parser.Token;
+import com.github.kija.parser.ast.BlockExpr;
+import com.github.kija.parser.ast.Expr;
 import java.util.List;
 
 /** 
@@ -12,22 +13,27 @@ public interface GrammarEvaluator {
    *  by the grammar production use_member.
    *  <code>member ::= use id</code>
    */
-  public void use_member(String id);
+  public void use_member(Token<String> id);
   /** This methods is called after the reduction of the non terminal member
    *  by the grammar production const_member.
    *  <code>member ::= _const id assign expr</code>
    */
-  public void const_member(String id,Expr expr);
+  public void const_member(Token<String> id,Expr expr);
   /** This methods is called after the reduction of the non terminal member
    *  by the grammar production data_member.
-   *  <code>member ::= data id lpar id_star_1 rpar</code>
+   *  <code>member ::= data id lpar parameter_star_1 rpar</code>
    */
-  public void data_member(String id,List<String> id_star);
+  public void data_member(Token<String> id,List<String> parameter_star);
   /** This methods is called after the reduction of the non terminal member
    *  by the grammar production fun_member.
-   *  <code>member ::= def id lpar id_star_2 rpar colon instr_star_3</code>
+   *  <code>member ::= def id lpar parameter_star_2 rpar colon instr_star_3</code>
    */
-  public void fun_member(String id,List<String> id_star,List<Expr> instr_star);
+  public void fun_member(Token<String> id,List<String> parameter_star,List<Expr> instr_star);
+  /** This methods is called after the reduction of the non terminal parameter
+   *  by the grammar production parameter.
+   *  <code>parameter ::= id</code>
+   */
+  public String parameter(Token<String> id);
   /** This methods is called after the reduction of the non terminal instr
    *  by the grammar production instr_expr.
    *  <code>instr ::= expr eol</code>
@@ -45,17 +51,22 @@ public interface GrammarEvaluator {
   public Expr instr_break(Expr expr_optional);
   /** This methods is called after the reduction of the non terminal instr
    *  by the grammar production instr_continue.
-   *  <code>instr ::= _continue expr_optional_6 eol</code>
+   *  <code>instr ::= _continue eol</code>
    */
-  public Expr instr_continue(Expr expr_optional);
+  public Expr instr_continue();
+  /** This methods is called after the reduction of the non terminal instr
+   *  by the grammar production instr_fail.
+   *  <code>instr ::= fail expr eol</code>
+   */
+  public Expr instr_fail(Expr expr);
   /** This methods is called after the reduction of the non terminal instr
    *  by the grammar production instr_print.
-   *  <code>instr ::= print expr_plus_7 eol</code>
+   *  <code>instr ::= print expr_plus_6 eol</code>
    */
   public Expr instr_print(List<Expr> expr_plus);
   /** This methods is called after the reduction of the non terminal block
    *  by the grammar production block.
-   *  <code>block ::= instr_star_8</code>
+   *  <code>block ::= instr_star_7</code>
    */
   public BlockExpr block(List<Expr> instr_star);
   /** This methods is called after the reduction of the non terminal expr
@@ -67,22 +78,22 @@ public interface GrammarEvaluator {
    *  by the grammar production expr_bool.
    *  <code>expr ::= bool</code>
    */
-  public Expr expr_bool(boolean bool);
+  public Expr expr_bool(Token<Boolean> bool);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_integer.
    *  <code>expr ::= integer</code>
    */
-  public Expr expr_integer(int integer);
+  public Expr expr_integer(Token<Integer> integer);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_number.
    *  <code>expr ::= number</code>
    */
-  public Expr expr_number(double number);
+  public Expr expr_number(Token<Double> number);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_text.
    *  <code>expr ::= text</code>
    */
-  public Expr expr_text(String text);
+  public Expr expr_text(Token<String> text);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_parens.
    *  <code>expr ::= lpar expr rpar</code>
@@ -92,22 +103,22 @@ public interface GrammarEvaluator {
    *  by the grammar production expr_var_access.
    *  <code>expr ::= id</code>
    */
-  public Expr expr_var_access(String id);
+  public Expr expr_var_access(Token<String> id);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_var_assignment.
    *  <code>expr ::= id assign expr</code>
    */
-  public Expr expr_var_assignment(String id,Expr expr);
+  public Expr expr_var_assignment(Token<String> id,Expr expr);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_attribute_access.
    *  <code>expr ::= expr dot id</code>
    */
-  public Expr expr_attribute_access(Expr expr,String id);
+  public Expr expr_attribute_access(Expr expr,Token<String> id);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_attribute_assignment.
    *  <code>expr ::= expr dot id assign expr</code>
    */
-  public Expr expr_attribute_assignment(Expr expr,String id,Expr expr2);
+  public Expr expr_attribute_assignment(Expr expr,Token<String> id,Expr expr2);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_array_access.
    *  <code>expr ::= expr lopt expr ropt</code>
@@ -120,19 +131,19 @@ public interface GrammarEvaluator {
   public Expr expr_array_assignment(Expr expr,Expr expr2,Expr expr3);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_fun_call.
-   *  <code>expr ::= id lpar expr_star_9 rpar</code>
+   *  <code>expr ::= id lpar expr_star_8 rpar</code>
    */
-  public Expr expr_fun_call(String id,List<Expr> expr_star);
+  public Expr expr_fun_call(Token<String> id,List<Expr> expr_star);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_method_call.
-   *  <code>expr ::= expr dot id lpar expr_star_10 rpar</code>
+   *  <code>expr ::= expr dot id lpar expr_star_9 rpar</code>
    */
-  public Expr expr_method_call(Expr expr,String id,List<Expr> expr_star);
+  public Expr expr_method_call(Expr expr,Token<String> id,List<Expr> expr_star);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_new_call.
-   *  <code>expr ::= _new id lpar expr_star_11 rpar</code>
+   *  <code>expr ::= _new id lpar expr_star_10 rpar</code>
    */
-  public Expr expr_new_call(String id,List<Expr> expr_star);
+  public Expr expr_new_call(Token<String> id,List<Expr> expr_star);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_if_else.
    *  <code>expr ::= _if expr colon block _else colon block end</code>
@@ -155,7 +166,7 @@ public interface GrammarEvaluator {
   public Expr expr_while(Expr expr,BlockExpr block);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_while_else.
-   *  <code>expr ::= _while expr colon block _else block end</code>
+   *  <code>expr ::= _while expr colon block _else colon block end</code>
    */
   public Expr expr_while_else(Expr expr,BlockExpr block,BlockExpr block2);
   /** This methods is called after the reduction of the non terminal expr
@@ -182,7 +193,7 @@ public interface GrammarEvaluator {
    *  by the grammar production expr_is_instance.
    *  <code>expr ::= expr is id</code>
    */
-  public Expr expr_is_instance(Expr expr,String id);
+  public Expr expr_is_instance(Expr expr,Token<String> id);
   /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_binary_and.
    *  <code>expr ::= expr amp expr</code>

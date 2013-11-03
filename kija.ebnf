@@ -62,6 +62,7 @@ tokens:
   _return = 'return'
   _break = 'break'
   _continue = 'continue'
+  fail = 'fail'
   
   nulz = "null"
   bool = "true|false"
@@ -77,14 +78,15 @@ comments:
  comment = "\/\/([^\r\n])*(\r)?\n"
  
 types:
- 'id': String
- 'text': String
- 'integer': int
- 'number': double
- 'bool': boolean
- expr: com.github.kija.compiler.ast.Expr
- block: com.github.kija.compiler.ast.BlockExpr
- instr: com.github.kija.compiler.ast.Expr
+ 'id': com.github.kija.parser.Token<String>
+ 'text': com.github.kija.parser.Token<String>
+ 'integer': com.github.kija.parser.Token<Integer>
+ 'number': com.github.kija.parser.Token<Double>
+ 'bool': com.github.kija.parser.Token<Boolean>
+ parameter: String
+ expr: com.github.kija.parser.ast.Expr
+ block: com.github.kija.parser.ast.BlockExpr
+ instr: com.github.kija.parser.ast.Expr
 
 starts:
   script
@@ -95,14 +97,18 @@ productions:
  
  member = 'use' 'id'                                    { use_member }
         | 'const' 'id' '=' expr                         { const_member }
-        | 'data' 'id' '(' 'id'/'comma'* ')'             { data_member }
-        | 'def' 'id' '(' 'id'/'comma'* ')' ':' instr*   { fun_member }
+        | 'data' 'id' '(' parameter/'comma'* ')'             { data_member }
+        | 'def' 'id' '(' parameter/'comma'* ')' ':' instr*   { fun_member }
         ;
+
+ parameter = 'id'      { parameter }
+           ;
 
  instr = expr 'eol'                   { instr_expr }
        | 'return' expr? 'eol'         { instr_return }
        | 'break' expr?  'eol'         { instr_break }
-       | 'continue' expr? 'eol'       { instr_continue }
+       | 'continue' 'eol'             { instr_continue }
+       | 'fail' expr 'eol'            { instr_fail }
        | 'print' expr/'comma'+ 'eol'  { instr_print }
        ;
   
