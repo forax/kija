@@ -136,7 +136,7 @@ public class PrettyPrinter implements ExprVisitor<StringBuilder, StringBuilder> 
 
   @Override
   public StringBuilder visitBlock(BlockExpr expr, StringBuilder builder) {
-    for(Expr e: expr.getExprs()) {
+    for(Expr e: expr.getInstructions()) {
       e.accept(this, builder);
       builder.append('\n');
     }
