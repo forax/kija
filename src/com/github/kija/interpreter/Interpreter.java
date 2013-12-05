@@ -164,6 +164,15 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
 
   @Override
   public Type visitVarAccess(VarAccessExpr expr, Interpreter interpreter) {
+    Object value = vars.get(currentFunction).get(expr.getName());
+
+    if (value == null) {
+      throw new RuntimeException("Variable `" + expr.getName()
+          + "` does not exist.");
+    } else {
+      stack.add(vars.get(currentFunction).get(expr.getName()));
+    }
+
     return null;
   }
 
