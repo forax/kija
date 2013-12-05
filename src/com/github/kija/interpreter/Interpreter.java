@@ -10,20 +10,21 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class Interpreter implements ExprVisitor<Expr, Type> {
+public class Interpreter implements ExprVisitor<Interpreter, Type> {
   private final Script script;
   private final String[] args;
   private final List<Use> uses;
   private final List<Const> consts;
   private final List<Data> datas;
   private final Map<String, Function> functions;
-  private String currentFunction;
+
   private Map<String, Map<String, Object>> vars = new HashMap<>();
+
+  private String currentFunction;
+  private Stack<Object> stack = new Stack<>();
 
   public Interpreter(Path scriptPath, String[] args) throws IOException {
     BufferedReader reader =
@@ -61,80 +62,82 @@ public class Interpreter implements ExprVisitor<Expr, Type> {
 
   private void interpretFunction(Function function) {
     currentFunction = function.getName();
+
+    vars.put(currentFunction, new HashMap<>());
+
     for (Expr instr : function.getBody().getInstructions()) {
-      instr.accept(this, instr);
+      instr.accept(this, this);
     }
   }
 
   @Override
-  public Type visitArrayAccess(ArrayAccessExpr expr, Expr otherExpr) {
+  public Type visitArrayAccess(ArrayAccessExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitArrayAssignment(ArrayAssignmentExpr expr, Expr otherExpr) {
+  public Type visitArrayAssignment(ArrayAssignmentExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitAttrAccess(AttrAccessExpr expr, Expr otherExpr) {
+  public Type visitAttrAccess(AttrAccessExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitAttrAssignment(AttrAssignmentExpr expr, Expr otherExpr) {
+  public Type visitAttrAssignment(AttrAssignmentExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitBinary(BinaryExpr expr, Expr otherExpr) {
+  public Type visitBinary(BinaryExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitBlock(BlockExpr expr, Expr otherExpr) {
+  public Type visitBlock(BlockExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitFlowStop(FlowStopExpr expr, Expr otherExpr) {
+  public Type visitFlowStop(FlowStopExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitFunCall(FunCallExpr expr, Expr otherExpr) {
+  public Type visitFunCall(FunCallExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitIf(IfExpr expr, Expr otherExpr) {
+  public Type visitIf(IfExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitIsInstance(IsInstanceExpr expr, Expr otherExpr) {
+  public Type visitIsInstance(IsInstanceExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitLiteral(LiteralExpr expr, Expr otherExpr) {
-    expr.getValue();
-
+  public Type visitLiteral(LiteralExpr expr, Interpreter interpreter) {
+    interpreter.stack.add(expr.getValue());
     return null;
   }
 
   @Override
-  public Type visitNewCall(NewCallExpr expr, Expr otherExpr) {
+  public Type visitNewCall(NewCallExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitMethodCall(MethodCallExpr expr, Expr otherExpr) {
+  public Type visitMethodCall(MethodCallExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitPrint(PrintExpr expr, Expr toPrint) {
+  public Type visitPrint(PrintExpr expr, Interpreter interpreter) {
     List<Expr> parameters = expr.getParameters();
 
     if (parameters.size() != 1) {
@@ -155,22 +158,35 @@ public class Interpreter implements ExprVisitor<Expr, Type> {
   }
 
   @Override
-  public Type visitUnary(UnaryExpr expr, Expr otherExpr) {
+  public Type visitUnary(UnaryExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitVarAccess(VarAccessExpr expr, Expr otherExpr) {
+  public Type visitVarAccess(VarAccessExpr expr, Interpreter interpreter) {
     return null;
   }
 
   @Override
-  public Type visitVarAssignment(VarAssignment expr, Expr otherExpr) {
+  public Type visitVarAssignment(VarAssignment expr, Interpreter interpreter) {
+    String name = expr.getName();
+    Object value = null;
+
+    if (expr.getExpr() instanceof LiteralExpr) {
+      expr.getExpr().accept(this, this);
+      value = stack.pop();
+    } else if (expr.getExpr() instanceof VarAccessExpr) {
+      expr.getExpr().accept(this, this);
+      value = stack.pop();
+    }
+
+    vars.get(currentFunction).put(name, value);
+
     return null;
   }
 
   @Override
-  public Type visitWhile(WhileExpr expr, Expr otherExpr) {
+  public Type visitWhile(WhileExpr expr, Interpreter interpreter) {
     return null;
   }
 }

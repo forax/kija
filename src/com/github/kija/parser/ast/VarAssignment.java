@@ -1,6 +1,5 @@
 package com.github.kija.parser.ast;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class VarAssignment extends Node implements Expr {
@@ -19,7 +18,7 @@ public class VarAssignment extends Node implements Expr {
   public Expr getExpr() {
     return expr;
   }
-  
+
   @Override
   public <P,R> R accept(ExprVisitor<? super P, ? extends R> visitor, P param) {
     return visitor.visitVarAssignment(this, param);
