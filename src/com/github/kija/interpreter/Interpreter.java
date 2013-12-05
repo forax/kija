@@ -149,7 +149,7 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
       System.out.println(((LiteralExpr) arg).getValue());
     } else if (parameters.get(0) instanceof VarAccessExpr) {
       VarAccessExpr arg = (VarAccessExpr) parameters.get(0);
-      System.out.println(vars.get(arg.getName()));
+      System.out.println(vars.get(currentFunction).get(arg.getName()));
     } else {
       throw new RuntimeException("print takes a string or a variable name.");
     }
