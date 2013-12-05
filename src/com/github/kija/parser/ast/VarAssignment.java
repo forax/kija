@@ -1,5 +1,6 @@
 package com.github.kija.parser.ast;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class VarAssignment extends Node implements Expr {

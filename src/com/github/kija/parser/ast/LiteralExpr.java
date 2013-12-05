@@ -11,7 +11,7 @@ public class LiteralExpr extends Node implements Expr {
   public Object getValue() {
     return valueOrNull;
   }
-  
+
   @Override
   public <P,R> R accept(ExprVisitor<? super P, ? extends R> visitor, P param) {
     return visitor.visitLiteral(this, param);

@@ -9,20 +9,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.github.kija.compiler.Type;
+import com.github.kija.interpreter.Interpreter;
 import com.github.kija.parser.Parser;
 import com.github.kija.parser.ast.Script;
 import com.github.kija.parser.ast.Use;
 
 public class Engine {
   private final MetaMirror metaMirror = new MetaMirror();
-  
+
   public void run(Path scriptPath, String[] args) throws Throwable {
     try(BufferedReader reader = Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8)) {
       UnitMirror unit = loadUnit(metaMirror, scriptPath.getParent(), scriptPath.getFileName().toString(), reader);
       runUnit(unit, args);
     }
   }
-  
+
   public void run(String scriptName, Reader reader, String[] args) throws Throwable {
     UnitMirror unit = loadUnit(metaMirror, Paths.get("."), scriptName, reader);
     runUnit(unit, args);

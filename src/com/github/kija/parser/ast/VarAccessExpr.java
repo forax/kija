@@ -2,7 +2,6 @@ package com.github.kija.parser.ast;
 
 import java.util.Objects;
 
-
 public class VarAccessExpr extends Node implements Expr {
   private final String name;
 
@@ -14,7 +13,7 @@ public class VarAccessExpr extends Node implements Expr {
   public String getName() {
     return name;
   }
-  
+
   @Override
   public <P,R> R accept(ExprVisitor<? super P, ? extends R> visitor, P param) {
     return visitor.visitVarAccess(this, param);
