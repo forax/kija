@@ -39,6 +39,7 @@ tokens:
   at = '@'
   is = '~'                     [is]               
   colon= ':'
+  dcolon= '::'
   comma =  ','
   eol = '\n'
   lpar = '\('
@@ -129,6 +130,7 @@ productions:
       | expr  '[' expr ']'                                    { expr_array_access }
       | expr  '[' expr ']' '=' expr               [assign]    { expr_array_assignment }
       
+      | '::' 'id'                                             { expr_fun_access }
       | 'id' '(' expr/'comma'*  ')'                           { expr_fun_call }
       | expr '.' 'id' '(' expr/'comma'*  ')'                  { expr_method_call }
       | 'new' 'id' '(' expr/'comma'*  ')'                     { expr_new_call }

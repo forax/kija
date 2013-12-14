@@ -13,6 +13,7 @@ import com.github.kija.parser.ast.Data;
 import com.github.kija.parser.ast.Expr;
 import com.github.kija.parser.ast.ExprVisitor;
 import com.github.kija.parser.ast.FlowStopExpr;
+import com.github.kija.parser.ast.FunAccessExpr;
 import com.github.kija.parser.ast.FunCallExpr;
 import com.github.kija.parser.ast.Function;
 import com.github.kija.parser.ast.IfExpr;
@@ -154,6 +155,11 @@ public class PrettyPrinter implements ExprVisitor<StringBuilder, StringBuilder> 
     return builder;
   }
 
+  @Override
+  public StringBuilder visitFunAccess(FunAccessExpr expr, StringBuilder builder) {
+    return builder.append("::").append(expr.getName());
+  }
+  
   @Override
   public StringBuilder visitFunCall(FunCallExpr expr, StringBuilder builder) {
     builder.append(expr.getName()).append('(');

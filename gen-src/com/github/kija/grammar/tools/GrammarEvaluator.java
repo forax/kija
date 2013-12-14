@@ -130,6 +130,11 @@ public interface GrammarEvaluator {
    */
   public Expr expr_array_assignment(Expr expr,Expr expr2,Expr expr3);
   /** This methods is called after the reduction of the non terminal expr
+   *  by the grammar production expr_fun_access.
+   *  <code>expr ::= dcolon id</code>
+   */
+  public Expr expr_fun_access(Token<String> id);
+  /** This methods is called after the reduction of the non terminal expr
    *  by the grammar production expr_fun_call.
    *  <code>expr ::= id lpar expr_star_8 rpar</code>
    */

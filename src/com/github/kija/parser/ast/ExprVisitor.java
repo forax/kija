@@ -9,6 +9,7 @@ public interface ExprVisitor<E, R> {
   public R visitBinary(BinaryExpr expr, E env);
   public R visitBlock(BlockExpr expr, E env);
   public R visitFlowStop(FlowStopExpr expr, E env);
+  public R visitFunAccess(FunAccessExpr expr, E env);
   public R visitFunCall(FunCallExpr expr, E env);
   public R visitIf(IfExpr expr, E env);
   public R visitIsInstance(IsInstanceExpr expr, E env);

@@ -139,6 +139,9 @@ public class AnalyzerProcessor<B extends LexerBuffer,D>
                  case colon: {
                        return;
            }
+                 case dcolon: {
+                       return;
+           }
                  case comma: {
                        return;
            }
@@ -531,6 +534,12 @@ public class AnalyzerProcessor<B extends LexerBuffer,D>
                       
           }
           return;
+                    case expr_fun_access: { // not synthetic
+                                 Token<String> id=(Token<String>)stack.pop_Object();
+                                                stack.push_Object(grammarEvaluator.expr_fun_access(id));
+                      
+          }
+          return;
                     case expr_star_8_element: { // STAR_SINGLETON
                              java.util.ArrayList<Expr> list=
                      new java.util.ArrayList<Expr>();
@@ -891,6 +900,9 @@ public class AnalyzerProcessor<B extends LexerBuffer,D>
               
               return;
                          case colon:
+              
+              return;
+                         case dcolon:
               
               return;
                          case comma:

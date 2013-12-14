@@ -27,6 +27,7 @@ import com.github.kija.parser.ast.BlockExpr;
 import com.github.kija.parser.ast.Expr;
 import com.github.kija.parser.ast.ExprVisitor;
 import com.github.kija.parser.ast.FlowStopExpr;
+import com.github.kija.parser.ast.FunAccessExpr;
 import com.github.kija.parser.ast.FunCallExpr;
 import com.github.kija.parser.ast.Function;
 import com.github.kija.parser.ast.IfExpr;
@@ -410,6 +411,12 @@ public class Compiler implements ExprVisitor<Compiler.Env, Type> {
     return DEAD;
   }
 
+  @Override
+  public Type visitFunAccess(FunAccessExpr expr, Env env) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
   @Override
   public Type visitFunCall(FunCallExpr expr, Env env) {
     // TODO Auto-generated method stub

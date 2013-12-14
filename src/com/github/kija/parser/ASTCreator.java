@@ -14,6 +14,7 @@ import com.github.kija.parser.ast.Const;
 import com.github.kija.parser.ast.Data;
 import com.github.kija.parser.ast.Expr;
 import com.github.kija.parser.ast.FlowStopExpr;
+import com.github.kija.parser.ast.FunAccessExpr;
 import com.github.kija.parser.ast.FunCallExpr;
 import com.github.kija.parser.ast.Function;
 import com.github.kija.parser.ast.IfExpr;
@@ -164,6 +165,10 @@ class ASTCreator implements GrammarEvaluator {
     return new ArrayAssignmentExpr(expr, expr2, expr3, expr.getLineNumber());
   }
 
+  @Override
+  public Expr expr_fun_access(Token<String> id) {
+    return new FunAccessExpr(id.value, id.lineNumber);
+  }
   @Override
   public Expr expr_fun_call(Token<String> id, List<Expr> expr_star) {
     return new FunCallExpr(id.value, expr_star, id.lineNumber);
