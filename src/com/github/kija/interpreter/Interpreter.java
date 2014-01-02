@@ -102,7 +102,20 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
 
   @Override
   public Type visitFlowStop(FlowStopExpr expr, Interpreter interpreter) {
-    return null;
+    Expr optionalExpr = expr.getOptionalExpr();
+    switch (expr.getKind()) {
+      case BREAK:
+        throw new UnsupportedOperationException();
+      case CONTINUE:
+        throw new UnsupportedOperationException();
+      case RETURN:
+        throw new UnsupportedOperationException();
+      case FAIL:
+        expr.getOptionalExpr().accept(this, interpreter);
+        throw new RuntimeException(stack.pop().toString());
+      default:
+        throw new UnsupportedOperationException();
+    }
   }
 
   @Override

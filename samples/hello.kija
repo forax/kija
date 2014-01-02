@@ -1,4 +1,8 @@
 def main(args):
-  foo = "I am a var"
   print "hello world!"
+
+  foo = "I am a var"
   print foo
+
+  bar = 9000
+  print bar
