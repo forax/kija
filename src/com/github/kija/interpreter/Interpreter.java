@@ -135,20 +135,22 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
   @Override
   public Type visitLiteral(LiteralExpr expr, Interpreter interpreter) {
     Object nonTypedValue = expr.getValue();
+    Type type;
     Value value;
 
     if (nonTypedValue instanceof Boolean) {
-      value = new Value(Type.BOOL, nonTypedValue);
+      type = Type.BOOL;
     } else if (nonTypedValue instanceof Integer) {
-      value = new Value(Type.INT, nonTypedValue);
+      type = Type.INT;
     } else if (nonTypedValue instanceof Double) {
-      value = new Value(Type.NUM, nonTypedValue);
+      type = Type.NUM;
     } else if (nonTypedValue instanceof String) {
-      value = new Value(Type.STR, nonTypedValue);
+      type = Type.STR;
     } else {
       throw new UnsupportedOperationException("This type is not supported.");
     }
 
+    value = new Value(type, nonTypedValue);
     interpreter.stack.add(value);
     return null;
   }
