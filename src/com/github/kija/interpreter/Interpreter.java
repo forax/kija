@@ -214,7 +214,14 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
     expr.getExpr().accept(this, this);
 
     Var var = new Var(expr.getName(), stack.pop());
-    vars.get(currentFunction).put(expr.getName(), var);
+
+    if (vars.get(currentFunction).get(expr.getName()) != null) {
+      Value value = var.getValue();
+      throw new RuntimeException("You cannot assign value `" + value +
+          "` to variable of type " + value.getType() + ".");
+    } else {
+      vars.get(currentFunction).put(expr.getName(), var);
+    }
 
     return null;
   }

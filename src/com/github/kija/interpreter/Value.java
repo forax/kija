@@ -11,6 +11,10 @@ public class Value {
     this.value = value;
   }
 
+  public Type getType() {
+    return type;
+  }
+
   @Override
   public String toString() {
     return value.toString();
