@@ -21,10 +21,10 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
   private final List<Data> datas;
   private final Map<String, Function> functions;
 
-  private Map<String, Map<String, Object>> vars = new HashMap<>();
+  private Map<String, Map<String, Var>> vars = new HashMap<>();
 
   private String currentFunction;
-  private Stack<Object> stack = new Stack<>();
+  private Stack<Value> stack = new Stack<>();
 
   public Interpreter(Path scriptPath, String[] args) throws IOException {
     BufferedReader reader =
@@ -102,7 +102,6 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
 
   @Override
   public Type visitFlowStop(FlowStopExpr expr, Interpreter interpreter) {
-    Expr optionalExpr = expr.getOptionalExpr();
     switch (expr.getKind()) {
       case BREAK:
         throw new UnsupportedOperationException();
@@ -135,7 +134,22 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
 
   @Override
   public Type visitLiteral(LiteralExpr expr, Interpreter interpreter) {
-    interpreter.stack.add(expr.getValue());
+    Object nonTypedValue = expr.getValue();
+    Value value;
+
+    if (nonTypedValue instanceof Boolean) {
+      value = new Value(Type.BOOL, nonTypedValue);
+    } else if (nonTypedValue instanceof Integer) {
+      value = new Value(Type.INT, nonTypedValue);
+    } else if (nonTypedValue instanceof Double) {
+      value = new Value(Type.NUM, nonTypedValue);
+    } else if (nonTypedValue instanceof String) {
+      value = new Value(Type.STR, nonTypedValue);
+    } else {
+      throw new UnsupportedOperationException("This type is not supported.");
+    }
+
+    interpreter.stack.add(value);
     return null;
   }
 
@@ -162,7 +176,13 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
       System.out.println(((LiteralExpr) arg).getValue());
     } else if (parameters.get(0) instanceof VarAccessExpr) {
       VarAccessExpr arg = (VarAccessExpr) parameters.get(0);
-      System.out.println(vars.get(currentFunction).get(arg.getName()));
+      Var var = vars.get(currentFunction).get(arg.getName());
+      if (var == null) {
+        throw new RuntimeException("Variable `" + arg.getName()
+            + "` does not exist.");
+      } else {
+        System.out.println(var.getValue().toString());
+      }
     } else {
       throw new RuntimeException("print takes a string or a variable name.");
     }
@@ -177,13 +197,13 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
 
   @Override
   public Type visitVarAccess(VarAccessExpr expr, Interpreter interpreter) {
-    Object value = vars.get(currentFunction).get(expr.getName());
+    Var var = vars.get(currentFunction).get(expr.getName());
 
-    if (value == null) {
+    if (var == null) {
       throw new RuntimeException("Variable `" + expr.getName()
           + "` does not exist.");
     } else {
-      stack.add(vars.get(currentFunction).get(expr.getName()));
+      stack.add(var.getValue());
     }
 
     return null;
@@ -191,18 +211,10 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
 
   @Override
   public Type visitVarAssignment(VarAssignment expr, Interpreter interpreter) {
-    String name = expr.getName();
-    Object value = null;
+    expr.getExpr().accept(this, this);
 
-    if (expr.getExpr() instanceof LiteralExpr) {
-      expr.getExpr().accept(this, this);
-      value = stack.pop();
-    } else if (expr.getExpr() instanceof VarAccessExpr) {
-      expr.getExpr().accept(this, this);
-      value = stack.pop();
-    }
-
-    vars.get(currentFunction).put(name, value);
+    Var var = new Var(expr.getName(), stack.pop());
+    vars.get(currentFunction).put(expr.getName(), var);
 
     return null;
   }
