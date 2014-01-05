@@ -3,7 +3,6 @@ package com.github.kija.interpreter;
 import com.github.kija.compiler.Type;
 import com.github.kija.parser.Parser;
 import com.github.kija.parser.ast.*;
-import com.github.kija.parser.ast.Function;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +12,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Interpreter implements ExprVisitor<Interpreter, Type> {
+public class Interpreter implements ExprVisitor<Map<String, Var>, Value> {
   private final Script script;
   private final String[] args;
   private final List<Use> uses;
@@ -21,14 +20,12 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
   private final List<Data> datas;
   private final Map<String, Function> functions;
 
-  private Map<String, Map<String, Var>> vars = new HashMap<>();
-
-  private String currentFunction;
-  private Stack<Value> stack = new Stack<>();
-
   public Interpreter(Path scriptPath, String[] args) throws IOException {
+    //FIXME, close() is not called on the reader !
+    // the interpreter should be initialized with a Script, not a scriptPath
+    // so this code should be moved in the code that call the Interpreter constructor
     BufferedReader reader =
-        Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8);
+        Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8); //FIXME, newBufferedReader can take 1 argument
     script    = Parser.parse(reader);
 
     this.args = args;
@@ -45,10 +42,11 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
     interpretConsts();
     interpretDatas();
 
-    if (!functions.containsKey("main")) {
+    Function function = functions.get("main");
+    if (function == null) {
       throw new RuntimeException("No main function found.");
     }
-    interpretFunction(functions.get("main"));
+    interpretFunction(function);
   }
 
   private void interpretUses() {
@@ -61,47 +59,47 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
   }
 
   private void interpretFunction(Function function) {
-    currentFunction = function.getName();
+    HashMap<String, Var> vars = new HashMap<>();
+    function.getBody().accept(this, vars);
+  }
 
-    vars.put(currentFunction, new HashMap<>());
+  @Override
+  public Value visitArrayAccess(ArrayAccessExpr expr, Map<String, Var> vars) {
+    return null;
+  }
 
-    for (Expr instr : function.getBody().getInstructions()) {
-      instr.accept(this, this);
+  @Override
+  public Value visitArrayAssignment(ArrayAssignmentExpr expr, Map<String, Var> vars) {
+    return null;
+  }
+
+  @Override
+  public Value visitAttrAccess(AttrAccessExpr expr, Map<String, Var> vars) {
+    return null;
+  }
+
+  @Override
+  public Value visitAttrAssignment(AttrAssignmentExpr expr, Map<String, Var> vars) {
+    return null;
+  }
+
+  @Override
+  public Value visitBinary(BinaryExpr expr, Map<String, Var> vars) {
+    return null;
+  }
+
+  @Override
+  public Value visitBlock(BlockExpr expr, Map<String, Var> vars) {
+    // FIXME, does a block create a new HashMap ??
+    for (Expr instr : expr.getInstructions()) {
+      instr.accept(this, vars);
     }
-  }
-
-  @Override
-  public Type visitArrayAccess(ArrayAccessExpr expr, Interpreter interpreter) {
+    //FIXME, the value of a block is the value of the last expression of a block
     return null;
   }
 
   @Override
-  public Type visitArrayAssignment(ArrayAssignmentExpr expr, Interpreter interpreter) {
-    return null;
-  }
-
-  @Override
-  public Type visitAttrAccess(AttrAccessExpr expr, Interpreter interpreter) {
-    return null;
-  }
-
-  @Override
-  public Type visitAttrAssignment(AttrAssignmentExpr expr, Interpreter interpreter) {
-    return null;
-  }
-
-  @Override
-  public Type visitBinary(BinaryExpr expr, Interpreter interpreter) {
-    return null;
-  }
-
-  @Override
-  public Type visitBlock(BlockExpr expr, Interpreter interpreter) {
-    return null;
-  }
-
-  @Override
-  public Type visitFlowStop(FlowStopExpr expr, Interpreter interpreter) {
+  public Value visitFlowStop(FlowStopExpr expr, Map<String, Var> vars) {
     switch (expr.getKind()) {
       case BREAK:
         throw new UnsupportedOperationException();
@@ -110,126 +108,111 @@ public class Interpreter implements ExprVisitor<Interpreter, Type> {
       case RETURN:
         throw new UnsupportedOperationException();
       case FAIL:
-        expr.getOptionalExpr().accept(this, interpreter);
-        throw new RuntimeException(stack.pop().toString());
+        Value value = expr.getOptionalExpr().accept(this, vars);
+        throw new RuntimeException(value.toString());
       default:
         throw new UnsupportedOperationException();
     }
   }
 
   @Override
-  public Type visitFunCall(FunCallExpr expr, Interpreter interpreter) {
+  public Value visitFunAccess(FunAccessExpr expr, Map<String, Var> vars) {
+    return null;
+  }
+  
+  @Override
+  public Value visitFunCall(FunCallExpr expr, Map<String, Var> vars) {
     return null;
   }
 
   @Override
-  public Type visitIf(IfExpr expr, Interpreter interpreter) {
+  public Value visitIf(IfExpr expr, Map<String, Var> vars) {
     return null;
   }
 
   @Override
-  public Type visitIsInstance(IsInstanceExpr expr, Interpreter interpreter) {
+  public Value visitIsInstance(IsInstanceExpr expr, Map<String, Var> vars) {
     return null;
   }
 
-  @Override
-  public Type visitLiteral(LiteralExpr expr, Interpreter interpreter) {
-    Object nonTypedValue = expr.getValue();
-    Type type;
-    Value value;
-
-    if (nonTypedValue instanceof Boolean) {
-      type = Type.BOOL;
-    } else if (nonTypedValue instanceof Integer) {
-      type = Type.INT;
-    } else if (nonTypedValue instanceof Double) {
-      type = Type.NUM;
-    } else if (nonTypedValue instanceof String) {
-      type = Type.STR;
-    } else {
-      throw new UnsupportedOperationException("This type is not supported.");
+  private static Type getTypeOf(Object value) {
+    if (value instanceof Boolean) {
+      return Type.BOOL;
     }
+    if (value instanceof Integer) {
+      return Type.INT;
+    }
+    if (value instanceof Double) {
+      return Type.NUM;
+    }
+    if (value instanceof String) {
+      return Type.STR;
+    }
+    throw new UnsupportedOperationException("This type is not supported.");
+  }
+  
+  @Override
+  public Value visitLiteral(LiteralExpr expr, Map<String, Var> vars) {
+    Object nonTypedValue = expr.getValue();
+    Type type = getTypeOf(nonTypedValue);  
+    return new Value(type, nonTypedValue);
+  }
 
-    value = new Value(type, nonTypedValue);
-    interpreter.stack.add(value);
+  @Override
+  public Value visitNewCall(NewCallExpr expr, Map<String, Var> vars) {
     return null;
   }
 
   @Override
-  public Type visitNewCall(NewCallExpr expr, Interpreter interpreter) {
+  public Value visitMethodCall(MethodCallExpr expr, Map<String, Var> vars) {
     return null;
   }
 
   @Override
-  public Type visitMethodCall(MethodCallExpr expr, Interpreter interpreter) {
-    return null;
-  }
-
-  @Override
-  public Type visitPrint(PrintExpr expr, Interpreter interpreter) {
+  public Value visitPrint(PrintExpr expr, Map<String, Var> vars) {
     List<Expr> parameters = expr.getParameters();
 
     if (parameters.size() != 1) {
       throw new RuntimeException("print takes one argument only");
     }
 
-    if (parameters.get(0) instanceof LiteralExpr) {
-      Expr arg = parameters.get(0);
-      System.out.println(((LiteralExpr) arg).getValue());
-    } else if (parameters.get(0) instanceof VarAccessExpr) {
-      VarAccessExpr arg = (VarAccessExpr) parameters.get(0);
-      Var var = vars.get(currentFunction).get(arg.getName());
-      if (var == null) {
-        throw new RuntimeException("Variable `" + arg.getName()
-            + "` does not exist.");
-      } else {
-        System.out.println(var.getValue().toString());
-      }
-    } else {
-      throw new RuntimeException("print takes a string or a variable name.");
-    }
+    Expr parameter = parameters.get(0);
+    Value argument = parameter.accept(this, vars);
+    System.out.println(argument);
+    
+    return null;   //FIXME, I don'think it should return null !
+  }
 
+  @Override
+  public Value visitUnary(UnaryExpr expr, Map<String, Var> vars) {
     return null;
   }
 
   @Override
-  public Type visitUnary(UnaryExpr expr, Interpreter interpreter) {
-    return null;
-  }
-
-  @Override
-  public Type visitVarAccess(VarAccessExpr expr, Interpreter interpreter) {
-    Var var = vars.get(currentFunction).get(expr.getName());
-
+  public Value visitVarAccess(VarAccessExpr expr, Map<String, Var> vars) {
+    Var var = vars.get(expr.getName());
     if (var == null) {
-      throw new RuntimeException("Variable `" + expr.getName()
-          + "` does not exist.");
-    } else {
-      stack.add(var.getValue());
+      throw new RuntimeException("Variable `" + expr.getName() + "` does not exist.");
     }
-
-    return null;
+    return var.getValue();
   }
 
   @Override
-  public Type visitVarAssignment(VarAssignment expr, Interpreter interpreter) {
-    expr.getExpr().accept(this, this);
+  public Value visitVarAssignment(VarAssignment expr, Map<String, Var> vars) {
+    Value value = expr.getExpr().accept(this, vars);
+    Var var = new Var(expr.getName(), value);  //FIXME, why did you create a var is a var already exist ??
 
-    Var var = new Var(expr.getName(), stack.pop());
-
-    if (vars.get(currentFunction).get(expr.getName()) != null) {
-      Value value = var.getValue();
+    if (vars.get(expr.getName()) != null) {   //FIXME, I don't understand this check ??
       throw new RuntimeException("You cannot assign value `" + value +
           "` to variable of type " + value.getType() + ".");
-    } else {
-      vars.get(currentFunction).put(expr.getName(), var);
     }
-
-    return null;
+    
+    vars.put(expr.getName(), var);
+    return value;
   }
 
   @Override
-  public Type visitWhile(WhileExpr expr, Interpreter interpreter) {
+  public Value visitWhile(WhileExpr expr, Map<String, Var> vars) {
     return null;
   }
 }
